@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberPulse Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for Visualizations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <style>
+    :root {
+      /* Dark Theme Color System */
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1c2526;
+      --bg-tertiary: #2e3839;
+      --bg-elevated: #3b4a4b;
+
+      /* Professional Gradient Colors */
+      --gradient-primary: linear-gradient(135deg, #00f260 0%, #0575e6 100%);
+      --gradient-secondary: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+      --gradient-accent: linear-gradient(135deg, #7f00ff 0%, #e100ff 100%);
+      --gradient-background: linear-gradient(135deg, #0a0a0a 0%, #1c2526 100%);
+      
+      /* Accent Colors */
+      --accent-primary: #00f260;
+      --accent-secondary: #ff6b6b;
+      --accent-tertiary: #7f00ff;
+      
+      /* Text Colors */
+      --text-primary: #e6e6e6;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      
+      /* Severity Colors (can be used for badges, charts, etc.) */
+      --severity-critical: #ff2d55; /* Updated to match new theme */
+      --severity-high: #ff9500;    /* Updated to match new theme */
+      --severity-medium: #ffd60a;  /* Updated to match new thème */
+      --severity-low: #32d74b;     /* Updated to match new theme */
+      
+      /* Status Colors */
+      --success: #32d74b;
+      --danger: #ff2d55;
+      --warning: #ffd60a;
+      --info: #0a84ff;
+      
+      /* Borders & Shadows */
+      --border-color: rgba(255, 255, 255, 0.1);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+      
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 14px;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space: 16px;
+      --space-md: 24px;
+      --space-lg: 32px;
+      --space-xl: 48px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif; /* Updated font */
+      background: #293537;
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+    
+    a { /* Add this new rule */
+      color: var(--accent-primary);
+      text-decoration: none; /* Optional: remove underline */
+      transition: color 0.2s ease;
+    }
+
+    a:hover { /* Add this new rule */
+      color: #00c04d; /* Slightly darker shade for hover, or choose another */
+      text-decoration: none; /* Optional: ensure no underline on hover */
+    }
+    
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      height: 100vh;
+      position: fixed;
+      padding: var(--space) 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    
+    .sidebar-header {
+      padding: 0 var(--space);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .logo-pulse {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 0 rgba(0, 242, 96, 0.4);
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 96, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 242, 96, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 96, 0); }
+    }
+    
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      flex: 1;
+    }
+    
+    .nav-item {
+      margin-bottom: var(--space-xs);
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space);
+      padding: var(--space-sm) var(--space);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+    
+    .nav-link.active {
+      background: var(--gradient-primary);
+      color: var(--text-primary);
+      border-left-color: var(--accent-primary);
+    }
+    
+    .nav-link i {
+      width: 20px;
+      text-align: center;
+    }
+    
+
+    
+    .mb-3 {
+      margin-bottom: var(--space);
+    }
+    
+    .mt-3 {
+      margin-top: var(--space);
+    }
+
+    .nav-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: var(--space) var(--space);
+      margin-top: var(--space);
+    }
+
+    .sidebar-toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: background-color 0.2s ease;
+      margin-left: auto;
+    }
+
+    .sidebar-toggle-btn:hover {
+      color: var(--text-primary);
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar.collapsed {
+      width: 70px;
+    }
+    .sidebar.collapsed .logo .logo-text {
+      display: none;
+    }
+    .sidebar.collapsed .logo {
+      justify-content: center;
+    }
+     .sidebar.collapsed .logo i {
+      font-size: 1.5rem;
+    }
+    .sidebar.collapsed .nav-link span {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .sidebar.collapsed .nav-link i {
+      margin-right: 0;
+    }
+    .sidebar.collapsed .nav-section-title {
+      text-align: center;
+    }
+    .sidebar.collapsed .nav-section-title span {
+      display: none;
+    }
+
+    /* Main Content Area Adjustments */
+    .main-content {
+      flex: 1;
+      padding: var(--space-md);
+      transition: margin-left 0.3s ease, max-width 0.3s ease;
+      overflow-y: auto;
+      height: 100vh;
+    }
+    
+    .main-content.expanded {
+      margin-left: 260px;
+      max-width: calc(100vw - 260px);
+    }
+
+    .main-content.collapsed {
+      margin-left: 70px;
+      max-width: calc(100vw - 70px);
+    }
+
+    /* Styles for dark tab content - to be applied to specific tab-content divs */
+    #All, #Critical, #High, #Medium, #Low, #ThreatIntel, #NetworkScans {
+      background-color: var(--bg-secondary) !important;
+      padding: var(--space-md) !important;
+      border-radius: var(--radius-lg) !important;
+      margin-bottom: var(--space-lg);
+    }
+
+    /* Refined styles for elements within dark tab sections */
+    #All > *, #Critical > *, #High > *, #Medium > *, #Low > *, #ThreatIntel > *, #NetworkScans > * {
+      color: var(--text-primary);
+    }
+    #All .table, #Critical .table, #High .table, #Medium .table, #Low .table, 
+    #ThreatIntel .table, #NetworkScans .table,
+    #All table, #Critical table, #High table, #Medium table, #Low table, 
+    #ThreatIntel table, #NetworkScans table {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    #All th, #Critical th, #High th, #Medium th, #Low th, 
+    #ThreatIntel th, #NetworkScans th,
+    #All td, #Critical td, #High td, #Medium td, #Low td, 
+    #ThreatIntel td, #NetworkScans td {
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+    #All thead th, #Critical thead th, #High thead th, #Medium thead th, #Low thead th, 
+    #ThreatIntel thead th, #NetworkScans thead th {
+      background-color: var(--bg-elevated) !important;
+      color: var(--text-primary) !important;
+    }
+    /* More specific text styling for elements inside dark tabs */
+    #All h1, #All h2, #All h3, #All h4, #All h5, #All h6, #All p, #All .card-title, #All .stat-label, #All .stat-value,
+    #Critical h1, #Critical h2, #Critical h3, #Critical h4, #Critical h5, #Critical h6, #Critical p, #Critical .card-title, #Critical .stat-label, #Critical .stat-value,
+    #High h1, #High h2, #High h3, #High h4, #High h5, #High h6, #High p, #High .card-title, #High .stat-label, #High .stat-value,
+    #Medium h1, #Medium h2, #Medium h3, #Medium h4, #Medium h5, #Medium h6, #Medium p, #Medium .card-title, #Medium .stat-label, #Medium .stat-value,
+    #Low h1, #Low h2, #Low h3, #Low h4, #Low h5, #Low h6, #Low p, #Low .card-title, #Low .stat-label, #Low .stat-value,
+    #ThreatIntel h1, #ThreatIntel h2, #ThreatIntel h3, #ThreatIntel h4, #ThreatIntel h5, #ThreatIntel h6, #ThreatIntel p, #ThreatIntel .card-title, #ThreatIntel .threat-header h3, #ThreatIntel .detail-row .label, #ThreatIntel .detail-section h4, #ThreatIntel .detail-section p,
+    #NetworkScans h1, #NetworkScans h2, #NetworkScans h3, #NetworkScans h4, #NetworkScans h5, #NetworkScans h6, #NetworkScans p, #NetworkScans .card-title {
+      color: var(--text-primary) !important;
+    }
+    #All .text-muted, #Critical .text-muted, #High .text-muted, #Medium .text-muted, #Low .text-muted, #ThreatIntel .text-muted, #NetworkScans .text-muted,
+    #ThreatIntel .detail-row .label {
+      color: var(--text-secondary) !important;
+    }
+     #All a, #Critical a, #High a, #Medium a, #Low a, #ThreatIntel a, #NetworkScans a {
+      color: var(--accent-primary) !important;
+    }
+    #All a:hover, #Critical a:hover, #High a:hover, #Medium a:hover, #Low a:hover, #ThreatIntel a:hover, #NetworkScans a:hover {
+      color: #00c04d !important;
+    }
+
+    /* Styles for .card and .stat-card to match the user-provided CSS (they are dark) */
+    .card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      color: var(--text-primary);
+    }
+    .card .card-title, .card p, .card span, .card div {
+      color: var(--text-primary);
+    }
+    .card a { color: var(--accent-primary); }
+    .card a:hover { color: #00c04d; }
+
+    .stat-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+      border-radius: var(--radius);
+      padding: var(--space);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .stat-card .stat-label {
+      color: var(--text-secondary);
+    }
+    .stat-card .stat-value {
+      color: var(--text-primary);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: var(--space-sm) 0;
+    }
+     .stat-card .stat-icon i {
+      color: var(--accent-primary);
+    }
+
+    .chart-container {
+      background-color: var(--bg-tertiary);
+      padding: var(--space);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* Ensure Chart.js text is light */
+    /* This is often controlled via Chart.js options, but a global override can help */
+    canvas {
+      /* Chart.js usually handles this via options, but you can force if needed */
+    }
+    
+    /* Ensure specific elements like badges use the new severity colors */
+    .badge-mini.critical, .severity-badge.critical { background-color: var(--severity-critical); color: white; }
+    .badge-mini.high, .severity-badge.high { background-color: var(--severity-high); color: white; }
+    .badge-mini.medium, .severity-badge.medium { background-color: var(--severity-medium); color: #000; } /* Dark text for yellow */
+    .badge-mini.low, .severity-badge.low { background-color: var(--severity-low); color: white; }
+    .badge-mini.unknown, .severity-badge.unknown { background-color: var(--text-muted); color: white; }
+
+    /* KEEPING EXISTING STYLES THAT ARE NOT OVERRIDDEN BY THE NEW THEME */
+    /* e.g., .dropdown-menu, .header-bar, .page-title, .header-actions, etc. */
+    /* Adjust them if they clash with the new dark theme */
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      background-color: var(--bg-elevated); /* Darker dropdown */
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow); /* Use new shadow */
+      min-width: 150px;
+      z-index: 1000; /* Ensure dropdown is on top */
+      margin-top: 4px;
+    }
+    
+    .dropdown-menu.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space);
+      margin-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--border-color); /* Use new border color */
+    }
+    
+    .page-title {
+      font-weight: 500;
+      font-size: 1.5rem;
+      color: var(--text-primary); /* Ensure title is light */
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: var(--space);
+      align-items: center;
+    }
+    
+    .time-selector button {
+      background-color: var(--bg-secondary); /* Darker buttons */
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .time-selector button:hover {
+      background-color: var(--bg-tertiary);
+    }
+    
+    .time-selector button.active {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .content-grid.large-items {
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+    
+    /* Cards */
+    .card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: fit-content;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space);
+    }
+    
+    .card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .card-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-badge.critical {
+      background-color: var(--severity-critical);
+      color: white;
+    }
+    
+    .card-badge.high {
+      background-color: var(--severity-high);
+      color: white;
+    }
+    
+    .card-badge.medium {
+      background-color: var(--severity-medium);
+      color: var(--bg-primary);
+    }
+    
+    .card-badge.low {
+      background-color: var(--severity-low);
+      color: white;
+    }
+    
+    .badge-mini {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-right: 5px;
+    }
+    
+    .badge-mini.critical {
+      background-color: var(--severity-critical);
+      color: white;
+    }
+    
+    .badge-mini.high {
+      background-color: var(--severity-high);
+      color: white;
+    }
+    
+    .badge-mini.medium {
+      background-color: var(--severity-medium);
+      color: var(--bg-primary);
+    }
+    
+    .badge-mini.low {
+      background-color: var(--severity-low);
+      color: white;
+    }
+    
+    .card-body {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .stat-card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: var(--space-sm) 0;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .stat-card.critical .stat-value {
+      color: var(--severity-critical);
+    }
+    
+    .stat-card.high .stat-value {
+      color: var(--severity-high);
+    }
+    
+    .stat-card.medium .stat-value {
+      color: var(--severity-medium);
+    }
+    
+    .stat-card.low .stat-value {
+      color: var(--severity-low);
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      gap: var(--space-xs);
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: #0099e6;
+    }
+    
+    .btn-secondary {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #c2d8f5;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    
+    .btn-outline:hover {
+      background-color: rgba(0, 170, 255, 0.1);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #e63946;
+    }
+    
+    /* Search and Filters */
+    .search-bar {
+      position: relative;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: #364747;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .filters {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      background-color: var(--gradient-accent);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--text-secondary);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      margin-top: 32px;
+      transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+      background-color: var(--bg-tertiary);
+    }
+    
+    .filter-btn.active {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      margin-bottom: var(--space-lg);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: var(--space-sm) var(--space);
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+    
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    td {
+      font-size: 0.875rem;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    
+    .table-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+    }
+    
+    .table-action-btn:hover {
+      color: var(--accent-primary);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: var(--space);
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: var(--space-xs);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+    }
+    
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237a8aa6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 32px;
+    }
+    
+
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      margin-bottom: var(--space);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg-tertiary) var(--bg-secondary);
+    }
+    
+    .tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .tabs::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    
+    .tabs::-webkit-scrollbar-thumb {
+      background-color: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+    
+    .tab {
+      padding: var(--space-sm) var(--space);
+      font-size: 0.875rem;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    
+    .tab:hover {
+      color: var(--text-primary);
+    }
+    
+    .tab.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      background-color: var(--bg-secondary);
+      display: block;
+    }
+    
+    /* Charts */
+    .chart-container {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      height: 250px;
+      margin-bottom: var(--space-lg);
+      position: relative;
+    }
+    
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-backdrop.show .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: var(--space);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: var(--space);
+    }
+    
+    .modal-footer {
+      padding: var(--space);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+    
+    /* Details Section */
+    .details-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .details-title {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .details-content {
+      background-color: var(--bg-secondary);
+      padding: 20px 20px 20px 40px;
+      border-radius: var(--radius);
+      margin-bottom: var(--space);
+    }
+    
+    .details-item {
+      display: flex;
+      margin-bottom: var(--space-sm);
+      font-size: 0.875rem;
+    }
+    
+    .details-label {
+      color: #a8acb0;
+      width: 150px;
+      flex-shrink: 0;
+    }
+    
+    .details-value {
+      color: var(--text-primary);
+    }
+    
+    /* Summary Section */
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+    
+    .summary-label {
+      color: var(--text-muted);
+    }
+    
+    .summary-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .scan-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      margin-top: 30px;
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    /* Threat Intel */
+    .threat-intel-item {
+      border-left: 3px solid var(--accent-primary);
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .threat-intel-source {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    
+    .threat-intel-date {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .scan-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 70px;
+        padding: var(--space-sm) 0;
+      }
+      
+      .sidebar-header {
+        justify-content: center;
+        padding: 0;
+      }
+      
+      .logo span {
+        display: none;
+      }
+      
+      .nav-link span {
+        display: none;
+      }
+      
+      .nav-link {
+        justify-content: center;
+        padding: var(--space-sm);
+      }
+      
+      .nav-section-title {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 70px;
+        max-width: calc(100vw - 70px);
+      }
+      
+      .content-grid.large-items {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .scan-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .time-selector {
+        flex-wrap: wrap;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--bg-tertiary);
+      border-radius: 20px;
+    }
+    
+    /* Loading Animation */
+    .loading {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    
+    .loading div {
+      position: absolute;
+      border: 4px solid var(--accent-primary);
+      opacity: 1;
+      border-radius: 50%;
+      animation: loading 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+    
+    .loading div:nth-child(2) {
+      animation-delay: -0.5s;
+    }
+    
+    @keyframes loading {
+      0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      4.9% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      5% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+      }
+    }
+    
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.75rem;
+    }
+    
+    .tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--bg-tertiary) transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Threat Intel Section */
+    .threat-intel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    
+    .threat-card {
+      background: #364747;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      transition: transform 0.2s;
+    }
+    
+    .threat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .threat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .threat-header h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.2rem;
+    }
+    
+    .severity-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .severity-badge.critical { background: #dc3545; color: white; }
+    .severity-badge.high { background: #fd7e14; color: white; }
+    .severity-badge.medium { background: #ffc107; color: #2c3e50; }
+    .severity-badge.low { background: #28a745; color: white; }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .detail-row .label {
+      color: #bec3c8;
+      font-weight: 500;
+    }
+    
+    .detail-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .detail-section h4 {
+      color: #e6e8eb;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .detail-section p {
+      color: #e6e8eb;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+    
+    .cwe-list, .exploit-list, .product-list, .reference-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .cwe-list li, .exploit-list li, .product-list li, .reference-list li {
+      padding: 0.25rem 0;
+      font-size: 0.9rem;
+      color: #495057;
+    }
+    
+    .reference-list a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+    
+    .reference-list a:hover {
+      text-decoration: underline;
+      color: #00c04d;
+    }
+    
+    .mitre-data {
+      background: #1c2526;
+      color: #e6e8eb;
+      padding: 0.75rem;
+      border-radius: 4px;
+    }
+    
+    .mitre-row {
+      display: flex;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .mitre-label {
+      color: #a8acb0;
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    
+    .mitre-value {
+      color: #c5c9ce;
+    }
+    
+    #threat-search {
+      width: 100%;
+          padding: 10px 40px 10px 16px;
+         border-radius: var(--radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #364747;
+    color: var(--text-primary);
+    margin-top: 12px;
+    font-size: 0.875rem;
+    }
+    
+    #threat-search:focus {
+      outline: none;
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+
+    .scan-section {
+      margin-bottom: 1.5rem;
+    }
+    
+    .scan-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .scan-section h4 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+    
+    .scan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .scan-item {
+      transition: all 0.3s ease;
+      padding: 1rem;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius);
+      border-left: 4px solid transparent;
+    }
+    
+    .scan-item.active {
+      background-color: rgba(0, 170, 255, 0.1);
+      border-left-color: var(--accent-primary);
+    }
+    
+    .scan-item.completed {
+      opacity: 0.8;
+      border-left-color: var(--success);
+    }
+    
+    .scan-info {
+      margin-bottom: 0.5rem;
+    }
+    
+    .scan-target {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .scan-time {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    
+    .scan-progress {
+      margin: 0.5rem 0;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background-color: var(--bg-secondary);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: var(--accent-primary);
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    
+    .scan-status {
+      margin-top: 0.5rem;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .status-badge.queued {
+      background-color: rgba(255, 171, 0, 0.2);
+      color: #ffab00;
+    }
+    
+    .status-badge.running {
+      background-color: rgba(0, 170, 255, 0.2);
+      color: #00aaff;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-badge.completed {
+      background-color: rgba(0, 204, 153, 0.2);
+      color: #00cc99;
+    }
+    
+    .status-badge.error {
+      background-color: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    
+  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/threat-intel.css') }}">
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('dashboard') }}" class="logo">
+        <img src="https://seekflag.com/wp-content/uploads/2022/03/Pk-Army-Flag-03.svg" alt="Pakistani Flag" class="logo-flag" style="height: 50px; width: auto; margin-left: -17px;">
+        <span class="logo-text">CyberPulse</span>
+        <span class="logo-pulse"></span>
+    </a>
+    
+      <button id="sidebarToggle" class="sidebar-toggle-btn" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+    <ul class="nav-links">
+      <li class="nav-item">
+        <a href="/dashboard" class="nav-link active">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/scan" class="nav-link">
+          <i class="fas fa-search"></i>
+          <span>Scan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/upload" class="nav-link">
+          <i class="fas fa-upload"></i>
+          <span>Upload XML/JSON</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/dashboard#All" class="nav-link">
+          <i class="fas fa-shield-alt"></i>
+          <span>Vulnerabilities</span>
+        </a>
+      </li>
+      
+      <div class="nav-section-title"><span>Intelligence</span></div>
+      <li class="nav-item">
+        <a href="/dashboard#ThreatIntel" class="nav-link">
+          <i class="fas fa-database"></i>
+          <span>Threat Intel</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/report" class="nav-link">
+          <i class="fas fa-file-alt"></i>
+          <span>Reports</span>
+        </a>
+      </li>
+      
+      <div class="nav-section-title"><span>System</span></div>
+      <li class="nav-item">
+        <a href="/settings" class="nav-link">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" id="export-dropdown-trigger">
+          <i class="fas fa-download"></i>
+          <span>Export</span>
+        </a>
+        <div class="dropdown-menu" id="export-dropdown">
+          <a href="/download/csv" class="dropdown-item">
+            <i class="fas fa-file-csv"></i> Export CSV
+          </a>
+          <a href="/download/json" class="dropdown-item">
+            <i class="fas fa-file-code"></i> Export JSON
+          </a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Bar -->
+    <div class="header-bar">
+      <h1 class="page-title">Vulnerability Dashboard</h1>
+      <div class="header-actions">
+        <div class="time-selector">
+          <button class="active">24h</button>
+          <button>7d</button>
+          <button>30d</button>
+          <button>All Time</button>
+        </div>
+        <button class="btn btn-primary">
+         
+          <i class="fas fa-plus"></i>
+          <span>New Scan</span>
+        </a>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Statistics Overview -->
+    <section class="stats-grid">
+      <div class="stat-card critical">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="stat-value">4</div>
+        <div class="stat-label">Critical</div>
+      </div>
+      <div class="stat-card high">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="stat-value">12</div>
+        <div class="stat-label">High</div>
+      </div>
+      <div class="stat-card medium">
+        <i class="fas fa-exclamation"></i>
+        <div class="stat-value">23</div>
+        <div class="stat-label">Medium</div>
+      </div>
+      <div class="stat-card low">
+        <i class="fas fa-info-circle"></i>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Low</div>
+      </div>
+    </section>
+    
+    <!-- Chart Visualization -->
+    <div class="content-grid large-items">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Vulnerability Trend</h3>
+          <div class="card-actions">
+            <button class="btn btn-outline">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Vulnerability Distribution</h3>
+          <div class="card-actions">
+            <button class="btn btn-outline">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="distributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <div class="tab active" data-section="All">All Vulnerabilities</div>
+      <div class="tab" data-section="Critical">Critical</div>
+      <div class="tab" data-section="High">High</div>
+      <div class="tab" data-section="Medium">Medium</div>
+      <div class="tab" data-section="Low">Low</div>
+      <div class="tab" data-section="ThreatIntel">Threat Intelligence</div>
+    </nav>
+    
+    <!-- All Vulnerabilities Tab -->
+    <div id="All" class="tab-content active">
+      <div class="search-bar">
+        <input type="text" class="search-input" placeholder="Search vulnerabilities by CVE, host, or description..." id="vuln-search">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+      
+      <div class="table-container">
+        <table id="all-vulns-table">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Severity</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Critical Vulnerabilities Tab -->
+    <div id="Critical" class="tab-content">
+      <h3 class="section-title">Critical Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table id="critical-vulns">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- High Vulnerabilities Tab -->
+    <div id="High" class="tab-content">
+      <h3 class="section-title">High Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table id="high-vulns">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Medium Vulnerabilities Tab -->
+    <div id="Medium" class="tab-content">
+      <h3 class="section-title">Medium Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table id="medium-vulns">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Low Vulnerabilities Tab -->
+    <div id="Low" class="tab-content">
+      <h3 class="section-title">Low Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table id="low-vulns">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Threat Intelligence Tab -->
+    <div id="ThreatIntel" class="tab-content">
+      <div class="section-header">
+        <h2>Threat Intelligence</h2>
+        <div class="search-container">
+          <input type="text" id="threat-search" placeholder="Search vulnerabilities...">
+        </div>
+      </div>
+      
+      <div id="threat-intel-container"></div>
+    </div>
+    
+
+    
+    <!-- Latest Scan Section -->
+    <h2 class="section-title">Latest Scan Results</h2>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Network Scan - 192.168.1.0/24</h3>
+        <span>Completed: May 12, 2025 14:30</span>
+      </div>
+      <div class="card-body">
+        <div class="scan-summary">
+          <div class="summary-item">
+            <span class="summary-label">Total hosts:</span>
+            <span class="summary-value">42</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Vulnerabilities found:</span>
+            <span class="summary-value">57</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Scan duration:</span>
+            <span class="summary-value">14m 32s</span>
+          </div>
+        </div>
+        <div class="scan-actions" style="margin-top: 16px; display: flex; gap: 8px;">
+          <button class="btn btn-primary">View Full Report</button>
+          <button class="btn btn-outline">Download Results</button>
+        </div>
+        <!-- Placeholder details for demonstration -->
+        <div class="scan-details" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary);">Recent Vulnerabilities</h4>
+          <ul style="color: var(--text-secondary);">
+            <li><strong>CVE-2023-12345</strong>: OpenSSH 7.2p2 - User Enumeration Vulnerability (Critical)</li>
+            <li><strong>CVE-2022-9876</strong>: Apache HTTPD 2.4.29 - Path Traversal (High)</li>
+            <li><strong>CVE-2021-4567</strong>: Samba 4.7.6 - Remote Code Execution (Medium)</li>
+            <li><strong>CVE-2020-1111</strong>: OpenSSL 1.1.1 - Information Disclosure (Low)</li>
+          </ul>
+          <p style="color: var(--text-muted); font-size: 0.9em; margin-top: 10px;">Reatime data caputring from the network.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal for Threat Intel Details -->
+    <div class="modal-backdrop" id="threatIntelModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Threat Intelligence: <span id="modalCveId"></span></h3>
+          <button class="modal-close" id="closeModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-ti-content"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="downloadThreatReport">
+            <i class="fas fa-download"></i> Download Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="{{ url_for('static', filename='js/lib/chart.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/lib/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/lib/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
+
+  <!-- Your custom JS files -->
+  <!-- Load structured remediation data first -->
+  <script src="{{ url_for('static', filename='data/structured_remediation_enhanced.js') }}"></script>
+  
+  <!-- Then load dashboard and threat-intel JS that might depend on it -->
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/threat-intel.js') }}"></script>
+  
+  <script>
+    // Sidebar Toggle Functionality
+    function initializeSidebarToggle() {
+      const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const logoText = document.querySelector('.logo-text');
+
+      if (sidebar && mainContent && sidebarToggle) {
+        const setSidebarState = (collapsed) => {
+          if (collapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('collapsed');
+            mainContent.classList.remove('expanded');
+            if (logoText) logoText.style.display = 'none';
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+          } else {
+            sidebar.classList.remove('collapsed');
+            mainContent.classList.remove('collapsed');
+            mainContent.classList.add('expanded');
+            if (logoText) logoText.style.display = 'inline';
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
+          }
+        };
+
+        // Check localStorage for saved state
+        const initiallyCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        setSidebarState(initiallyCollapsed);
+        // Ensure toggle button is visible for JS to work with it
+        sidebarToggle.style.display = 'block';
+
+        sidebarToggle.addEventListener('click', () => {
+          const isCollapsed = sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('collapsed');
+          mainContent.classList.toggle('expanded');
+          
+          if (isCollapsed) {
+            if (logoText) logoText.style.display = 'none';
+            localStorage.setItem('sidebarCollapsed', 'true');
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+          } else {
+            if (logoText) logoText.style.display = 'inline';
+            localStorage.setItem('sidebarCollapsed', 'false');
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
+          }
+        });
+      } else {
+        console.error("Sidebar toggle elements not found. Ensure .sidebar, .main-content, and #sidebarToggle exist.");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // ... other initializations ...
+      initializeTabs();
+      handleHashChange();
+      initializeExportDropdown();
+      initializeSearch();
+      
+      initializeSidebarToggle();
+      
+      // Initialize dashboard data loading (if not already called elsewhere)
+      if (typeof initializeDashboard === 'function') {
+        // initializeDashboard();
+      } else if (typeof loadDashboardData === 'function') {
+        // loadDashboardData();
+      }
+    });
+    
+
+
+    // Make sure the Chart.js configuration uses dark theme styles
+    // Example for Chart.defaults (place this before any chart creations)
+    if (typeof Chart !== 'undefined') {
+      Chart.defaults.color = 'var(--text-secondary)';
+      Chart.defaults.borderColor = 'var(--border-color)';
+
+      Chart.defaults.font.family = 'Inter, sans-serif';
+
+      // Specific overrides for scales, legend, title if needed
+      Chart.defaults.plugins.legend.labels.color = 'var(--text-primary)';
+      Chart.defaults.plugins.title.color = 'var(--text-primary)';
+      
+      Chart.defaults.scale.ticks.color = 'var(--text-secondary)';
+      Chart.defaults.scale.grid.color = 'var(--border-color)';
+      Chart.defaults.scale.title.color = 'var(--text-primary)';
+    }
+  </script>
+</body>
+</html>
+

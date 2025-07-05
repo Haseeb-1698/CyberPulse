@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Vulnerability Report{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="header-bar">
+  <h1 class="page-title">Upload OpenVAS XML Report</h1>
+  <div class="header-actions">
+    <button class="btn btn-outline" onclick="window.location.href='{{ url_for('index') }}'">
+      <i class="fas fa-chart-bar"></i>
+      <span>View Dashboard</span>
+    </button>
+  </div>
+</div>
+
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+  <div class="card-header">
+    <h3 class="card-title">Select XML File</h3>
+    <i class="fas fa-file-upload"></i>
+  </div>
+  <div class="card-body">
+    <p class="upload-description mb-3">
+      Upload an OpenVAS XML report file to analyze vulnerabilities and generate a comprehensive report with severity predictions.
+    </p>
+    
+    <form id="upload-form" class="mb-4">
+      <label for="file-input" class="file-upload">
+        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+        <p class="file-upload-text">Drag & drop your XML file here or click to browse</p>
+        <p class="file-upload-text" style="font-size: 0.75rem; color: var(--text-muted);">Supported format: .xml</p>
+        <input type="file" id="file-input" name="file" accept=".xml" required>
+      </label>
+      
+      <button type="submit" class="btn btn-primary mt-3" style="width: 100%;">
+        <i class="fas fa-play"></i> Start Analysis Pipeline
+      </button>
+    </form>
+    
+    <div class="upload-features">
+      <div class="feature-item">
+        <i class="fas fa-robot"></i>
+        <div class="feature-text">
+          <h4>AI-Powered Analysis</h4>
+          <p>Machine learning model categorizes vulnerabilities by severity</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-chart-pie"></i>
+        <div class="feature-text">
+          <h4>Visual Dashboard</h4>
+          <p>Interactive visualization of vulnerabilities and trends</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-shield-alt"></i>
+        <div class="feature-text">
+          <h4>Threat Intelligence</h4>
+          <p>Enhanced with external threat data sources</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="loading-box">
+    <div class="loading">
+      <div></div>
+      <div></div>
+    </div>
+    <p id="stage-text" class="stage-text">Initializing…</p>
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+  </div>
+</div>
+<!-- Video Loading Overlay -->
+<div id="video-loading-overlay" class="loading-overlay" style="display:none;">
+  <div class="loading-box" style="max-width: 600px;">
+    <div class="loading" style="margin-bottom: 1rem;">
+      <div></div>
+      <div></div>
+    </div>
+    <video id="pipeline-wait-video" width="100%" controls style="border-radius: var(--radius); background: #000;" preload="auto">
+      <source src="/static/data/animation_vs_math.mp4#t=443" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <p class="stage-text" style="margin-top: 1rem; color: var(--text-primary);">Pipeline is running, please wait…</p>
+    <!-- Demo button to simulate pipeline completion -->
+    <button type="button" class="btn btn-primary mt-3" onclick="onPipelineComplete()">Skip waiting and go to Dashboard</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+  .file-upload.has-file {
+    border-color: var(--accent-primary);
+    background-color: rgba(0, 170, 255, 0.05);
+  }
+
+  .file-upload.dragover {
+    border-color: var(--accent-primary);
+    background-color: rgba(0, 170, 255, 0.1);
+  }
+
+  .upload-features {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .feature-item i {
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    margin-top: 4px;
+  }
+
+  .feature-text h4 {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+  }
+
+  .feature-text p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+
+  .loading-box {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 300px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .stage-text {
+    margin: 16px 0;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
+
+  .mt-3 {
+    margin-top: 1rem;
+  }
+
+  #video-loading-overlay .loading-box {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  #video-loading-overlay video {
+    width: 100%;
+    max-width: 560px;
+    outline: none;
+    margin: 0 auto;
+    display: block;
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/process.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // File upload visual feedback
+    const fileInput = document.getElementById('file-input');
+    const fileUpload = document.querySelector('.file-upload');
+    
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files.length > 0) {
+        fileUpload.classList.add('has-file');
+        fileUpload.querySelector('.file-upload-text').textContent = fileInput.files[0].name;
+      }
+    });
+    
+    // Drag and drop functionality
+    fileUpload.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      fileUpload.classList.add('dragover');
+    });
+    
+    fileUpload.addEventListener('dragleave', function() {
+      fileUpload.classList.remove('dragover');
+    });
+    
+    fileUpload.addEventListener('drop', function(e) {
+      e.preventDefault();
+      fileUpload.classList.remove('dragover');
+      
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        if (fileInput.files[0].name.endsWith('.xml')) {
+          fileUpload.classList.add('has-file');
+          fileUpload.querySelector('.file-upload-text').textContent = fileInput.files[0].name;
+        } else {
+          alert('Please upload a valid XML file');
+        }
+      }
+    });
+
+    // Show video overlay when pipeline starts
+    const uploadForm = document.getElementById('upload-form');
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', function(e) {
+        showPipelineVideoOverlay();
+        // Allow the form to submit as normal, or use AJAX as needed
+        // If using AJAX, prevent default and handle completion below
+        // e.preventDefault();
+        // simulatePipelineComplete();
+      });
+    }
+  });
+
+  function showPipelineVideoOverlay() {
+    const overlay = document.getElementById('video-loading-overlay');
+    const video = document.getElementById('pipeline-wait-video');
+    if (overlay && video) {
+      overlay.style.display = 'flex';
+      video.currentTime = 443;
+      video.muted = false;
+      video.volume = 1.0;
+      // video.play(); // Do NOT autoplay
+      document.body.style.overflow = 'hidden';
+    }
+  }
+  function hidePipelineVideoOverlay() {
+    const overlay = document.getElementById('video-loading-overlay');
+    const video = document.getElementById('pipeline-wait-video');
+    if (overlay && video) {
+      overlay.style.display = 'none';
+      video.pause();
+      document.body.style.overflow = '';
+    }
+  }
+  // Call this function when the pipeline completes (from your AJAX or backend callback)
+  function onPipelineComplete() {
+    hidePipelineVideoOverlay();
+    window.location.href = 'http://127.0.0.1:5000/dashboard#All';
+  }
+  // Example: simulate pipeline completion after 10 seconds (for demo/testing)
+  // function simulatePipelineComplete() {
+  //   setTimeout(onPipelineComplete, 10000);
+  // }
+</script>
+{% endblock %}

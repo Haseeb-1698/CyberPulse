@@ -1,0 +1,230 @@
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3d3d3d;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent-primary: #4a90e2;
+    --accent-secondary: #2c5282;
+    --border-color: #404040;
+    --radius: 10px;
+    --space: 1.5rem;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: var(--space);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 50%;
+    border: 1px solid var(--border-color);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-title {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-body {
+    color: var(--text-secondary);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+    padding: 1rem;
+}
+
+/* Severity colors */
+.severity-critical {
+    color: #ff4d4f;
+}
+
+.severity-high {
+    color: #ff8c66;
+}
+
+.severity-medium {
+    color: #ffaa00;
+}
+
+.severity-low {
+    color: #00cc99;
+}
+
+/* Table styles */
+.table-container {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-secondary);
+}
+
+th {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+tr:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Badge styles */
+.badge-mini {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-mini.critical {
+    background-color: rgba(255, 77, 79, 0.1);
+    color: #ff4d4f;
+}
+
+.badge-mini.high {
+    background-color: rgba(255, 140, 102, 0.1);
+    color: #ff8c66;
+}
+
+.badge-mini.medium {
+    background-color: rgba(255, 170, 0, 0.1);
+    color: #ffaa00;
+}
+
+.badge-mini.low {
+    background-color: rgba(0, 204, 153, 0.1);
+    color: #00cc99;
+}
+
+/* Button styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+}
+
+/* Details row styles */
+.details-row {
+    background-color: var(--bg-tertiary);
+}
+
+.details-content {
+    padding: 1rem;
+}
+
+.details-section {
+    margin-bottom: 1rem;
+}
+
+.details-section h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.details-section p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Search input styles */
+.search-container {
+    margin-bottom: 1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+/* Grid layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space);
+    margin-bottom: var(--space);
+}
+
+.content-grid.large-items {
+    grid-template-columns: 1fr;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+} 

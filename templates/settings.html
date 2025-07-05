@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="header-bar">
+  <h1 class="page-title">System Settings</h1>
+  <div class="header-actions">
+    <button class="btn btn-primary" id="save-settings-btn" type="submit" form="settings-form">
+      <i class="fas fa-save"></i>
+      <span>Save Changes</span>
+    </button>
+  </div>
+</div>
+
+<!-- Settings Form -->
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  <div class="card-header">
+    <h3 class="card-title">OpenVAS Configuration</h3>
+    <i class="fas fa-cog"></i>
+  </div>
+  <div class="card-body">
+    <form id="settings-form" method="POST" action="{{ url_for('settings') }}">
+      <div class="form-group">
+        <label for="vm_ip" class="form-label">OpenVAS Server IP Address</label>
+        <input type="text" id="vm_ip" name="vm_ip" class="form-control" value="{{ vm_ip }}" placeholder="e.g., 192.168.1.10">
+        <div class="form-help">IP address of the OpenVAS server for vulnerability scanning.</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="scan_mode" class="form-label">Default Scan Mode</label>
+        <select id="scan_mode" name="scan_mode" class="form-control">
+          <option value="quick" {% if scan_mode == 'quick' %}selected{% endif %}>Quick Scan</option>
+          <option value="full" {% if scan_mode == 'full' %}selected{% endif %}>Full Scan</option>
+          <option value="deep" {% if scan_mode == 'deep' %}selected{% endif %}>Deep Scan</option>
+        </select>
+        <div class="form-help">Select the default scanning mode for new scans.</div>
+      </div>
+      
+      <div class="form-divider"></div>
+      
+      <h4 class="settings-section-title">API Integration</h4>
+      
+      <div class="form-group">
+        <label for="api_key" class="form-label">API Key</label>
+        <div class="input-with-action">
+          <input type="password" id="api_key" name="api_key" class="form-control" value="••••••••••••••••">
+          <button type="button" class="btn btn-sm btn-secondary toggle-password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="webhook_url" class="form-label">Webhook URL</label>
+        <input type="url" id="webhook_url" name="webhook_url" class="form-control" placeholder="https://example.com/webhook">
+        <div class="form-help">Webhook for scan notifications (optional).</div>
+      </div>
+      
+      <div class="form-divider"></div>
+      
+      <h4 class="settings-section-title">Advanced Settings</h4>
+      
+      <div class="form-group toggle-switch">
+        <label class="toggle-label">
+          <span>Enable Automatic Scanning</span>
+          <div class="toggle">
+            <input type="checkbox" id="auto_scan" name="auto_scan">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+        <div class="form-help">Schedule regular scans automatically.</div>
+      </div>
+      
+      <div class="form-group toggle-switch">
+        <label class="toggle-label">
+          <span>Send Email Notifications</span>
+          <div class="toggle">
+            <input type="checkbox" id="email_notify" name="email_notify">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+        <div class="form-help">Send email alerts for critical vulnerabilities.</div>
+      </div>
+      
+      <div class="form-group toggle-switch">
+        <label class="toggle-label">
+          <span>Debug Mode</span>
+          <div class="toggle">
+            <input type="checkbox" id="debug_mode" name="debug_mode">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+        <div class="form-help">Enable verbose logging for troubleshooting.</div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- System Information Card -->
+<div class="card" style="max-width: 800px; margin: 24px auto 0;">
+  <div class="card-header">
+    <h3 class="card-title">System Information</h3>
+    <i class="fas fa-info-circle"></i>
+  </div>
+  <div class="card-body">
+    <div class="system-info-grid">
+      <div class="system-info-item">
+        <div class="info-label">Application Version</div>
+        <div class="info-value">1.2.0</div>
+      </div>
+      <div class="system-info-item">
+        <div class="info-label">OpenVAS Version</div>
+        <div class="info-value">21.4.4</div>
+      </div>
+      <div class="system-info-item">
+        <div class="info-label">Last Database Update</div>
+        <div class="info-value">May 12, 2025</div>
+      </div>
+      <div class="system-info-item">
+        <div class="info-label">System Status</div>
+        <div class="info-value"><span class="status-badge complete">Operational</span></div>
+      </div>
+    </div>
+    
+    <div class="form-divider"></div>
+    
+    <div class="card-actions">
+      <button type="button" class="btn btn-outline" id="check-updates-btn">
+        <i class="fas fa-sync-alt"></i> Check for Updates
+      </button>
+      <button type="button" class="btn btn-danger" id="reset-settings-btn">
+        <i class="fas fa-undo"></i> Reset to Defaults
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    document.querySelector('.toggle-password').addEventListener('click', function() {
+      const apiKeyInput = document.getElementById('api_key');
+      const eyeIcon = this.querySelector('i');
+      
+      if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        apiKeyInput.type = 'password';
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    });
+    
+    // Reset settings confirmation
+    document.getElementById('reset-settings-btn').addEventListener('click', function() {
+      if (confirm('Are you sure you want to reset all settings to default values? This action cannot be undone.')) {
+        // Perform reset
+        alert('Settings have been reset to defaults.');
+        location.reload();
+      }
+    });
+    
+    // Check for updates animation
+    document.getElementById('check-updates-btn').addEventListener('click', function() {
+      const btn = this;
+      const icon = btn.querySelector('i');
+      
+      btn.disabled = true;
+      icon.classList.add('fa-spin');
+      
+      setTimeout(() => {
+        icon.classList.remove('fa-spin');
+        btn.disabled = false;
+        alert('Your system is up to date!');
+      }, 2000);
+    });
+    
+    // Simple form validation
+    document.getElementById('settings-form').addEventListener('submit', function(e) {
+      const vmIp = document.getElementById('vm_ip').value.trim();
+      
+      if (!vmIp) {
+        e.preventDefault();
+        alert('OpenVAS Server IP address is required.');
+        return false;
+      }
+      
+      // Show saving indicator
+      const saveBtn = document.getElementById('save-settings-btn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      
+      // Allow form submission to continue
+      setTimeout(() => {
+        saveBtn.innerHTML = originalText;
+      }, 2000);
+    });
+  });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+  }
+
+  .form-help {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .form-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin: 24px 0;
+  }
+
+  .settings-section-title {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .input-with-action {
+    display: flex;
+    align-items: center;
+  }
+
+  .input-with-action .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    flex: 1;
+  }
+
+  .input-with-action .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    height: 100%;
+  }
+
+  .toggle-switch {
+    margin-bottom: 16px;
+  }
+
+  .toggle-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .toggle {
+    position: relative;
+    width: 48px;
+    height: 24px;
+  }
+
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-tertiary);
+    transition: .4s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .toggle-slider {
+    background-color: var(--accent-primary);
+  }
+
+  input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+    background-color: white;
+  }
+
+  .system-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .system-info-item {
+    padding: 12px;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .status-badge.complete {
+    background-color: rgba(0, 204, 153, 0.2);
+    color: var(--severity-low);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+  }
+
+  .fa-spin {
+    animation: fa-spin 1s infinite linear;
+  }
+
+  @keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}

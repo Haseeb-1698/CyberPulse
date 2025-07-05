@@ -1,0 +1,760 @@
+{% extends "base.html" %}
+
+{% block title %}Security Scan{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="header-bar">
+  <h1 class="page-title">Security Scan</h1>
+  <div class="header-actions">
+    <nav class="tabs">
+      <div class="tab active" onclick="openSection(event, 'ScanHistory')">Scan History</div>
+      <div class="tab" onclick="openSection(event, 'QuickScan')">Quick Scan</div>
+    </nav>
+  </div>
+</div>
+
+<!-- Scan History Tab -->
+<div id="ScanHistory" class="tab-content active">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Recent Scans</h3>
+      <button class="btn btn-sm btn-outline" onclick="togglePreviousScans()">
+        <i class="fas fa-history"></i> Toggle Previous Scans
+      </button>
+    </div>
+    <div class="card-body">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Target</th>
+          <th>Date</th>
+          <th>Scan Type</th>
+          <th>Vulnerabilities</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+          <tbody id="scan-history-body">
+            <!-- Scan history will be populated dynamically -->
+      </tbody>
+    </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Scan Tab -->
+<div id="QuickScan" class="tab-content">
+    <div class="card">
+      <div class="card-header">
+      <h3 class="card-title">New Scan</h3>
+      </div>
+      <div class="card-body">
+      <div class="scan-form">
+          <div class="form-group">
+          <label for="target-input" class="form-label">Target IP Address or Domain</label>
+          <div class="input-group">
+            <span class="input-icon">
+              <i class="fas fa-globe"></i>
+            </span>
+            <input type="text" id="target-input" class="form-control" placeholder="e.g., 192.168.1.1 or example.com">
+            <button class="btn btn-sm btn-outline" onclick="validateAndStartScan()">
+              <i class="fas fa-check"></i> Validate
+            </button>
+          </div>
+          <div class="input-help">Enter a valid IP address or domain name to scan</div>
+        </div>
+        
+          <div class="form-group">
+            <label class="form-label">Scan Type</label>
+          <div class="scan-type-options">
+            <label class="scan-type-option">
+              <input type="radio" name="scan_type" value="basic" checked>
+              <div class="scan-type-content">
+                <i class="fas fa-bolt"></i>
+                <span>Basic Scan</span>
+                <small>Quick port scan and basic vulnerability check</small>
+              </div>
+            </label>
+            <label class="scan-type-option">
+              <input type="radio" name="scan_type" value="advanced">
+              <div class="scan-type-content">
+                <i class="fas fa-shield-alt"></i>
+                <span>Advanced Scan</span>
+                <small>Comprehensive vulnerability assessment</small>
+            </div>
+            </label>
+            <label class="scan-type-option">
+              <input type="radio" name="scan_type" value="full">
+              <div class="scan-type-content">
+                <i class="fas fa-search"></i>
+                <span>Full Port Scan</span>
+                <small>Complete port enumeration and service detection</small>
+          </div>
+            </label>
+            <label class="scan-type-option">
+              <input type="radio" name="scan_type" value="vuln">
+              <div class="scan-type-content">
+                <i class="fas fa-bug"></i>
+                <span>Vulnerability Detection</span>
+                <small>Deep vulnerability analysis and exploit checks</small>
+            </div>
+            </label>
+          </div>
+        </div>
+
+          <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="start-scan" onclick="startScan()">
+              <i class="fas fa-play"></i> Start Scan
+            </button>
+          <button type="button" class="btn btn-outline" id="download-result" onclick="downloadResult()" disabled>
+            <i class="fas fa-download"></i> Download Result
+            </button>
+        </div>
+
+        <div id="status" class="status-container">
+          <div class="status-icon">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </div>
+          <div class="status-text">No scan running.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="card">
+      <div class="card-header">
+      <h3 class="card-title">Previous Reports</h3>
+      </div>
+      <div class="card-body">
+      <div id="previous-reports" class="previous-reports">
+        <!-- Previous reports will be populated dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    let currentReportId = null;
+    let scanInterval = null;
+    let isPreviousScansVisible = true;
+
+    // Use dynamic VM IP passed from Flask
+    const baseUrl = "{{ vm_ip }}";
+
+    function updateStatus(message, isError = false) {
+        const statusContainer = document.getElementById('status');
+        if (isError) {
+            statusContainer.innerHTML = `
+                <div class="status-icon error">
+                    <i class="fas fa-exclamation-circle"></i>
+    </div>
+                <div class="status-text error">
+                    <div class="error-title">Error</div>
+                    <div class="error-message">${message}</div>
+                    <div class="error-help">Please try again or contact support if the issue persists.</div>
+        </div>
+            `;
+        } else {
+            statusContainer.innerHTML = `
+                <div class="status-icon">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+                <div class="status-text">
+                    <div class="status-message">${message}</div>
+                    <div class="status-progress" id="status-progress"></div>
+        </div>
+            `;
+        }
+    }
+
+    function updateProgress(progress) {
+        const progressElement = document.getElementById('status-progress');
+        if (progressElement) {
+            progressElement.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+      </div>
+                <div class="progress-text">${progress}% Complete</div>
+            `;
+        }
+    }
+
+    function toggleButtons(startEnabled, downloadEnabled) {
+        document.getElementById('start-scan').disabled = !startEnabled;
+        document.getElementById('download-result').disabled = !downloadEnabled;
+    }
+
+    function validateAndStartScan() {
+        const target = document.getElementById('target-input').value.trim();
+        if (!target) {
+            showError('Please enter a valid IP address or domain name.');
+            return;
+        }
+        
+        // Basic IP validation
+        const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+        const domainPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+        
+        if (!ipPattern.test(target) && !domainPattern.test(target)) {
+            showError('Please enter a valid IP address or domain name.');
+            return;
+        }
+        
+        startScan();
+    }
+
+    function showError(message) {
+        const statusContainer = document.getElementById('status');
+        statusContainer.innerHTML = `
+            <div class="status-icon error">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="status-text error">
+                <div class="error-title">Error</div>
+                <div class="error-message">${message}</div>
+                <div class="error-help">Please try again or contact support if the issue persists.</div>
+    </div>
+        `;
+    }
+
+    function startScan() {
+        const target = document.getElementById('target-input').value.trim();
+        if (!target) {
+            updateStatus('Please enter a valid IP address or domain name.', true);
+            return;
+        }
+        
+        updateStatus('Initializing scan...');
+        updateProgress(0);
+        toggleButtons(false, false);
+
+        fetch(`http://${baseUrl}:5000/start_scan`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `ip=${encodeURIComponent(target)}`
+        })
+        .then(async res => {
+            const data = await res.json();
+            console.log('Start scan response:', data);
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to start scan');
+            }
+            return data;
+        })
+        .then(data => {
+            console.log('Processing response:', data); // Debug log
+            if (data.error) {
+                updateStatus(data.error, true);
+                toggleButtons(true, false);
+            } else if (data.task_id || data.taskId) { // Check both possible formats
+                const taskId = data.task_id || data.taskId;
+                console.log('Using task ID:', taskId); // Debug log
+                currentReportId = taskId;
+                updateStatus(`Scan started for ${target}`);
+                updateProgress(5);
+                startStatusCheck(target, taskId);
+                addToScanHistory(target, 'In Progress', taskId);
+            } else {
+                console.error('Response missing task ID:', data); // Debug log
+                updateStatus('Server response missing task ID. Please try again.', true);
+                toggleButtons(true, false);
+            }
+        })
+        .catch(err => {
+            console.error('Scan error:', err);
+            updateStatus(err.message || 'Error starting scan. Please try again.', true);
+            toggleButtons(true, false);
+        });
+    }
+
+    function startStatusCheck(target, taskId) {
+        if (scanInterval) clearInterval(scanInterval);
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        console.log('Starting status check for task:', taskId); // Debug log
+
+        scanInterval = setInterval(() => {
+            fetch(`http://${baseUrl}:5000/scan_status/${encodeURIComponent(taskId)}`)
+            .then(async res => {
+                const data = await res.json();
+                console.log('Status check response:', data); // Debug log
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to check scan status');
+                }
+                return data;
+            })
+            .then(data => {
+                console.log('Processing status:', data); // Debug log
+                if (data.error || data.status === 'Not Found') {
+                    retryCount++;
+                    if (retryCount >= maxRetries) {
+                        updateStatus(data.error || 'Scan not found.', true);
+                        toggleButtons(true, false);
+                        clearInterval(scanInterval);
+                        updateScanHistoryStatus(taskId, 'Failed');
+                    } else {
+                        console.log(`Retry ${retryCount}/${maxRetries} for task ${taskId}`);
+                    }
+                } else if (data.status === 'Done') {
+                    updateStatus(`Scan completed for ${target}.`);
+                    updateProgress(100);
+                    if (data.report_id || data.reportId) {
+                        const reportId = data.report_id || data.reportId;
+                        currentReportId = reportId;
+                        toggleButtons(true, true);
+                        updateScanHistoryStatus(taskId, 'Completed');
+                    } else {
+                        updateStatus('No report ID received', true);
+                        toggleButtons(true, false);
+                    }
+                    clearInterval(scanInterval);
+                } else {
+                    const progress = data.progress || 0;
+                    updateStatus(`Scanning ${target}: ${data.status}`);
+                    updateProgress(progress);
+                }
+            })
+            .catch(err => {
+                console.error('Status check error:', err);
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    updateStatus('Error checking scan status.', true);
+                    toggleButtons(true, false);
+                    clearInterval(scanInterval);
+                    updateScanHistoryStatus(taskId, 'Failed');
+                }
+            });
+        }, 5000);
+    }
+
+    function downloadResult() {
+        if (currentReportId) {
+            window.location.href = `http://${baseUrl}:5000/download_historical_report/${encodeURIComponent(currentReportId)}`;
+        }
+    }
+
+    function togglePreviousScans() {
+        const tableContainer = document.querySelector('.table-container');
+        isPreviousScansVisible = !isPreviousScansVisible;
+        tableContainer.style.display = isPreviousScansVisible ? 'block' : 'none';
+    }
+
+    function addToScanHistory(target, status, scanId) {
+        const tbody = document.getElementById('scan-history-body');
+        const row = document.createElement('tr');
+        row.id = scanId;
+        row.innerHTML = `
+            <td>${target}</td>
+            <td>${new Date().toLocaleString()}</td>
+            <td>Advanced Scan</td>
+            <td>
+                <span class="badge-mini critical">-</span>
+                <span class="badge-mini high">-</span>
+                <span class="badge-mini medium">-</span>
+            </td>
+            <td><span class="status-badge ${status.toLowerCase()}">${status}</span></td>
+            <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="viewScanDetails('${scanId}')">
+                    <i class="fas fa-eye"></i>
+                    <span class="tooltip-text">View Details</span>
+      </button>
+                <button class="table-action-btn tooltip" onclick="downloadScanResult('${scanId}')">
+                    <i class="fas fa-download"></i>
+                    <span class="tooltip-text">Download Report</span>
+      </button>
+            </td>
+        `;
+        tbody.insertBefore(row, tbody.firstChild);
+    }
+
+    function updateScanHistoryStatus(scanId, status) {
+        const row = document.getElementById(scanId);
+        if (row) {
+            const statusCell = row.querySelector('.status-badge');
+            statusCell.className = `status-badge ${status.toLowerCase()}`;
+            statusCell.textContent = status;
+        }
+    }
+
+    function viewScanDetails(scanId) {
+        // Implement view details functionality
+        console.log('Viewing details for scan:', scanId);
+    }
+
+    function downloadScanResult(scanId) {
+        window.location.href = `http://${baseUrl}:5000/download_historical_report/${encodeURIComponent(scanId)}`;
+    }
+
+    function viewPreviousReports() {
+        const container = document.getElementById('previous-reports');
+        fetch(`http://${baseUrl}:5000/get_previous_reports`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                container.innerHTML = `<p class="text-muted">${data.message}</p>`;
+            } else {
+                let html = '<div class="report-list">';
+                data.reports.forEach(r => {
+                    html += `
+                        <div class="report-item">
+                            <div class="report-info">
+                                <span class="report-target">${r.target}</span>
+                                <span class="report-date">${new Date(r.date).toLocaleString()}</span>
+    </div>
+                            <a href="http://${baseUrl}:5000/download_historical_report/${encodeURIComponent(r.report_id)}" 
+                               class="btn btn-sm btn-outline">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+  </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            container.innerHTML = `<p class="text-danger">Error loading reports.</p>`;
+        });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        viewPreviousReports();
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .scan-form {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--bg-tertiary);
+        border-radius: var(--radius);
+        padding: 0.5rem;
+    }
+    .input-icon {
+        color: var(--text-muted);
+        padding: 0 0.5rem;
+    }
+    .input-group .form-control {
+        flex: 1;
+        border: none;
+        background: none;
+        padding: 0.5rem;
+        color: var(--text-primary);
+    }
+    .input-group .form-control:focus {
+        outline: none;
+        box-shadow: none;
+    }
+    .input-help {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    .status-container.error {
+        background-color: rgba(255, 71, 87, 0.1);
+    }
+    .status-icon.error {
+        color: #ff4757;
+    }
+    .status-text.error {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .error-title {
+        font-weight: 600;
+        color: #ff4757;
+    }
+    .error-message {
+        color: #ff4757;
+        font-size: 0.9rem;
+    }
+    .error-help {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+    }
+    .scan-type-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 10px;
+        margin-top: 0.5rem;
+    }
+    .scan-type-option {
+        position: relative;
+        cursor: pointer;
+    }
+    .scan-type-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+    .scan-type-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--bg-tertiary);
+        border-radius: var(--radius);
+        transition: all 0.2s ease;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .scan-type-option input[type="radio"]:checked + .scan-type-content {
+        border-color: var(--accent-primary);
+        background-color: rgba(0, 242, 96, 0.08);
+    }
+    .scan-type-content i {
+        font-size: 1.5rem;
+        color: var(--accent-primary);
+        margin-bottom: 0.5rem;
+    }
+    .scan-type-content span {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    .scan-type-content small {
+        color: var(--text-muted);
+        text-align: center;
+        font-size: 0.75rem;
+    }
+    .status-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: var(--bg-tertiary);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+    }
+    .status-icon {
+        color: var(--accent-primary);
+        font-size: 1.5rem;
+    }
+    .status-text {
+        flex: 1;
+    }
+    .status-message {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .progress-bar {
+        width: 100%;
+        height: 4px;
+        background-color: var(--bg-secondary);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    .progress-fill {
+        height: 100%;
+        background-color: var(--accent-primary);
+        transition: width 0.3s ease;
+    }
+    .progress-text {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    .table-container {
+        margin-top: 1rem;
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--bg-secondary);
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    th {
+        background-color: var(--bg-tertiary);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 500;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+    td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+    .badge-mini {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .status-badge.in-progress {
+        background-color: rgba(255, 171, 0, 0.2);
+        color: #ffab00;
+    }
+    .status-badge.completed {
+        background-color: rgba(0, 204, 153, 0.2);
+        color: #00cc99;
+    }
+    .status-badge.failed {
+        background-color: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+    }
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .table-action-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s ease;
+    }
+    .table-action-btn:hover {
+        color: var(--accent-primary);
+        background-color: var(--bg-tertiary);
+    }
+    .previous-reports {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .report-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .report-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background-color: var(--bg-tertiary);
+        border-radius: var(--radius);
+    }
+    .report-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .report-target {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    .report-date {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    @media (max-width: 768px) {
+        .scan-type-options {
+            grid-template-columns: 1fr;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+    }
+    /* Add spacing between cards */
+    .card:not(:last-child) {
+        margin-bottom: 2rem;
+    }
+    /* Extra space between Recent Scans and New Scan */
+    #ScanHistory .card {
+        margin-bottom: 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Tab navigation
+  function openSection(evt, sectionName) {
+    const tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {
+      tabContents[i].classList.remove("active");
+    }
+
+    const tabs = document.getElementsByClassName("tab");
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].classList.remove("active");
+    }
+
+    document.getElementById(sectionName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+    window.location.hash = sectionName;
+  }
+
+  // Toggle modal
+  function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle("show");
+  }
+
+  // File upload visual feedback
+  document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById("file-input");
+    const fileUpload = document.querySelector(".file-upload");
+
+    fileInput.addEventListener("change", function () {
+      if (fileInput.files.length > 0) {
+        fileUpload.classList.add("has-file");
+        fileUpload.querySelector(".file-upload-text").textContent = fileInput.files[0].name;
+      }
+    });
+
+    fileUpload.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      fileUpload.classList.add("dragover");
+    });
+
+    fileUpload.addEventListener("dragleave", function () {
+      fileUpload.classList.remove("dragover");
+    });
+
+    fileUpload.addEventListener("drop", function (e) {
+      e.preventDefault();
+      fileUpload.classList.remove("dragover");
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        if (fileInput.files[0].name.endsWith(".xml")) {
+          fileUpload.classList.add("has-file");
+          fileUpload.querySelector(".file-upload-text").textContent = fileInput.files[0].name;
+        } else {
+          alert("Please upload a valid XML file");
+        }
+      }
+    });
+
+    // Initialize tabs based on URL hash
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      const tabElement = document.querySelector(`.tab[onclick*="${hash}"]`);
+      if (tabElement) {
+        openSection({ currentTarget: tabElement }, hash);
+      }
+    }
+  });
+</script>
+{% endblock %}

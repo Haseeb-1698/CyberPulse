@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Severity Predictions{% endblock %}
+
+{% block content %}
+<div class="header-bar">
+  <h1 class="page-title">Severity Predictions</h1>
+</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Host</th>
+        <th>CVE</th>
+        <th>CVSS</th>
+        <th>Predicted Severity</th>
+        <th>Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in tables %}
+      <tr>
+        <td>{{ row.host }}</td>
+        <td>{{ row.cve_id }}</td>
+        <td>{{ row.cvss_v3_score }}</td>
+        <td><span class="card-badge {{ row.predicted_severity|lower }}">{{ row.predicted_severity }}</span></td>
+        <td>{{ '%.2f'|format(row.prediction_confidence) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+  .card-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  .card-badge.critical {
+    background-color: var(--severity-critical);
+    color: white;
+  }
+  .card-badge.high {
+    background-color: var(--severity-high);
+    color: white;
+  }
+  .card-badge.medium {
+    background-color: var(--severity-medium);
+    color: var(--bg-primary);
+  }
+  .card-badge.low {
+    background-color: var(--severity-low);
+    color: white;
+  }
+</style>
+{% endblock %}

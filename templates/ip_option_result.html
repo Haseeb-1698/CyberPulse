@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}IP Scan Results{% endblock %}
+
+{% block content %}
+<div class="header-bar">
+  <h1 class="page-title">IP Scan Results</h1>
+  <div class="header-actions">
+    <a href="{{ url_for('scan') }}" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back to Scanner</span>
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Target: {{ target }}</h3>
+  </div>
+  <div class="card-body">
+    <h4 class="section-title">Scan Report</h4>
+    <pre class="mono" style="background: var(--bg-tertiary); padding: var(--space); border-radius: var(--radius);">{{ report }}</pre>
+  </div>
+</div>
+{% endblock %}

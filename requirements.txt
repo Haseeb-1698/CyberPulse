@@ -1,0 +1,39 @@
+# Core Flask and Web Framework
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+Werkzeug>=2.3.0
+
+# Data Processing and Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Machine Learning and AI
+scikit-learn>=1.3.0
+sentence-transformers>=2.2.0
+joblib>=1.3.0
+
+# Natural Language Processing
+nltk>=3.8.0
+beautifulsoup4>=4.12.0
+
+# HTTP and API Requests
+requests>=2.31.0
+
+# Data Visualization (Optional)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# XML Processing
+lxml>=4.9.0
+
+# Additional Utilities
+python-dateutil>=2.8.0
+pathlib2>=2.3.0; python_version < "3.4"
+
+# Security and Cryptography
+cryptography>=41.0.0
+
+# Development and Testing (Optional)
+pytest>=7.4.0
+pytest-flask>=1.2.0

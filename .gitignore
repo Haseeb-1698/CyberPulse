@@ -1,0 +1,145 @@
+# Secrets and environment variables
+.env
+.secrets
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Large data files and caches
+*.pkl
+*.pickle
+*.csv
+*.json
+!requirements.txt
+!config.json
+!README.md
+
+# Cache directories
+cve_cache/
+mitre_cache/
+remediation_cache/
+exploit_cache/
+vulners_cache/
+shodan_cache/
+
+# Log files
+*.log
+logs/
+
+# Upload files
+uploads/
+*.xml
+
+# Generated reports
+integrated_results/
+scans/
+
+# Dashboard data
+dashboard_data.json
+jobs_persistence.json
+scan_history.json
+
+# Test files
+test_vulnerabilities.json
+vulnerability_classifier.pkl
+
+# Exploit database
+exploitdb/
+
+# Models directory
+models/
+
+# Static data (generated)
+static/data/
+
+# Remediation feedback
+remediation_feedback/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 

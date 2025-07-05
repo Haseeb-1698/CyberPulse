@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberPulse Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for Visualizations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <style>
+    :root {
+      /* Color System */
+      --bg-primary: #f5faff;
+      --bg-secondary: #e6f0fa;
+      --bg-tertiary: #d1e3fa;
+      --accent-primary: #00aaff;
+      --accent-secondary: #4c6ef5;
+      --text-primary: #1a2a44;
+      --text-secondary: #4a5e7c;
+      --text-muted: #7a8aa6;
+      --danger: #ff4d4f;
+      --warning: #ffaa00;
+      --success: #00cc99;
+      --info: #00aaff;
+      
+      /* Severity Colors */
+      --severity-critical: #ff4d4f;
+      --severity-high: #ff8c66;
+      --severity-medium: #ffaa00;
+      --severity-low: #00cc99;
+      
+      /* Border Radius */
+      --radius-sm: 4px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space: 16px;
+      --space-md: 24px;
+      --space-lg: 32px;
+      --space-xl: 48px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+    
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid rgba(0, 0, 0, 0.05);
+      height: 100vh;
+      position: fixed;
+      padding: var(--space) 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    
+    .sidebar-header {
+      padding: 0 var(--space);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--accent-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .logo-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 170, 255, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 170, 255, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 170, 255, 0);
+      }
+    }
+    
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      flex: 1;
+    }
+    
+    .nav-item {
+      margin-bottom: var(--space-xs);
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space);
+      padding: var(--space-sm) var(--space);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--text-primary);
+    }
+    
+    .nav-link.active {
+      background-color: rgba(0, 170, 255, 0.1);
+      color: var(--accent-primary);
+      border-left-color: var(--accent-primary);
+    }
+    
+    .nav-link i {
+      width: 20px;
+      text-align: center;
+    }
+    
+    .nav-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: var(--space) var(--space);
+      margin-top: var(--space);
+    }
+    
+    /* Dropdown for Export */
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      background-color: var(--bg-secondary);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      min-width: 150px;
+      z-index: 100;
+      margin-top: 4px;
+    }
+    
+    .dropdown-menu.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: var(--space-md);
+      max-width: calc(100vw - 260px);
+    }
+    
+    /* Header Bar */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space);
+      margin-bottom: var(--space-lg);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .page-title {
+      font-weight: 500;
+      font-size: 1.5rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: var(--space);
+      align-items: center;
+    }
+    
+    /* Time Selector */
+    .time-selector {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .time-selector button {
+      background-color: var(--bg-secondary);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .time-selector button:hover {
+      background-color: var(--bg-tertiary);
+    }
+    
+    .time-selector button.active {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .content-grid.large-items {
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+    
+    /* Cards */
+    .card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: 100%;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space);
+    }
+    
+    .card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .card-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-badge.critical {
+      background-color: var(--severity-critical);
+      color: white;
+    }
+    
+    .card-badge.high {
+      background-color: var(--severity-high);
+      color: white;
+    }
+    
+    .card-badge.medium {
+      background-color: var(--severity-medium);
+      color: var(--bg-primary);
+    }
+    
+    .card-badge.low {
+      background-color: var(--severity-low);
+      color: white;
+    }
+    
+    .badge-mini {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-right: 5px;
+    }
+    
+    .badge-mini.critical {
+      background-color: var(--severity-critical);
+      color: white;
+    }
+    
+    .badge-mini.high {
+      background-color: var(--severity-high);
+      color: white;
+    }
+    
+    .badge-mini.medium {
+      background-color: var(--severity-medium);
+      color: var(--bg-primary);
+    }
+    
+    .badge-mini.low {
+      background-color: var(--severity-low);
+      color: white;
+    }
+    
+    .card-body {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .stat-card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: var(--space-sm) 0;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .stat-card.critical .stat-value {
+      color: var(--severity-critical);
+    }
+    
+    .stat-card.high .stat-value {
+      color: var(--severity-high);
+    }
+    
+    .stat-card.medium .stat-value {
+      color: var(--severity-medium);
+    }
+    
+    .stat-card.low .stat-value {
+      color: var(--severity-low);
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      gap: var(--space-xs);
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: #0099e6;
+    }
+    
+    .btn-secondary {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #c2d8f5;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    
+    .btn-outline:hover {
+      background-color: rgba(0, 170, 255, 0.1);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #e63946;
+    }
+    
+    /* Search and Filters */
+    .search-bar {
+      position: relative;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .filters {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      background-color: var(--bg-secondary);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--text-secondary);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+      background-color: var(--bg-tertiary);
+    }
+    
+    .filter-btn.active {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border-color: var(--accent-primary);
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      margin-bottom: var(--space-lg);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: var(--space-sm) var(--space);
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+    
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    td {
+      font-size: 0.875rem;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    
+    .table-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+    }
+    
+    .table-action-btn:hover {
+      color: var(--accent-primary);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: var(--space);
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: var(--space-xs);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+    }
+    
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237a8aa6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 32px;
+    }
+    
+    /* File Upload */
+    .file-upload {
+      display: flex;
+      align-items: center;
+      padding: var(--space);
+      border: 2px dashed rgba(0, 0, 0, 0.1);
+      border-radius: var(--radius);
+      justify-content: center;
+      flex-direction: column;
+      gap: var(--space-sm);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      background-color: var(--bg-tertiary);
+      margin-bottom: var(--space);
+    }
+    
+    .file-upload:hover {
+      border-color: var(--accent-primary);
+      background-color: rgba(0, 170, 255, 0.05);
+    }
+    
+    .file-upload-icon {
+      font-size: 2rem;
+      color: var(--text-muted);
+    }
+    
+    .file-upload-text {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .file-upload input[type="file"] {
+      display: none;
+    }
+    
+    /* Progress */
+    .progress-container {
+      height: 8px;
+      background-color: var(--bg-tertiary);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: var(--space);
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--accent-primary);
+      transition: width 0.3s ease;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      margin-bottom: var(--space);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg-tertiary) var(--bg-secondary);
+    }
+    
+    .tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .tabs::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    
+    .tabs::-webkit-scrollbar-thumb {
+      background-color: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+    
+    .tab {
+      padding: var(--space-sm) var(--space);
+      font-size: 0.875rem;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    
+    .tab:hover {
+      color: var(--text-primary);
+    }
+    
+    .tab.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Charts */
+    .chart-container {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: var(--space);
+      height: 250px;
+      margin-bottom: var(--space-lg);
+      position: relative;
+    }
+    
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius);
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-backdrop.show .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: var(--space);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: var(--space);
+    }
+    
+    .modal-footer {
+      padding: var(--space);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+    
+    /* Details Section */
+    .details-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .details-title {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .details-content {
+      background-color: var(--bg-secondary);
+      padding: var(--space);
+      border-radius: var(--radius);
+      margin-bottom: var(--space);
+    }
+    
+    .details-item {
+      display: flex;
+      margin-bottom: var(--space-sm);
+      font-size: 0.875rem;
+    }
+    
+    .details-label {
+      color: var(--text-muted);
+      width: 150px;
+      flex-shrink: 0;
+    }
+    
+    .details-value {
+      color: var(--text-primary);
+    }
+    
+    /* Summary Section */
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+    
+    .summary-label {
+      color: var(--text-muted);
+    }
+    
+    .summary-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .scan-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      margin-top: 30px;
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    /* Threat Intel */
+    .threat-intel-item {
+      border-left: 3px solid var(--accent-primary);
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .threat-intel-source {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    
+    .threat-intel-date {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .scan-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 70px;
+        padding: var(--space-sm) 0;
+      }
+      
+      .sidebar-header {
+        justify-content: center;
+        padding: 0;
+      }
+      
+      .logo span {
+        display: none;
+      }
+      
+      .nav-link span {
+        display: none;
+      }
+      
+      .nav-link {
+        justify-content: center;
+        padding: var(--space-sm);
+      }
+      
+      .nav-section-title {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 70px;
+        max-width: calc(100vw - 70px);
+      }
+      
+      .content-grid.large-items {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .scan-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .time-selector {
+        flex-wrap: wrap;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--bg-tertiary);
+      border-radius: 20px;
+    }
+    
+    /* Loading Animation */
+    .loading {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    
+    .loading div {
+      position: absolute;
+      border: 4px solid var(--accent-primary);
+      opacity: 1;
+      border-radius: 50%;
+      animation: loading 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+    
+    .loading div:nth-child(2) {
+      animation-delay: -0.5s;
+    }
+    
+    @keyframes loading {
+      0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      4.9% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      5% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+      }
+    }
+    
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.75rem;
+    }
+    
+    .tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--bg-tertiary) transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-pulse"></div>
+        <span>CyberPulse</span>
+      </div>
+    </div>
+    
+    <ul class="nav-links">
+      <li class="nav-item">
+        <a href="#" class="nav-link active" onclick="openSection(event, 'Dashboard')">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-search"></i>
+          <span>Scan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-upload"></i>
+          <span>Upload XML/JSON</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" onclick="openSection(event, 'All')">
+          <i class="fas fa-shield-alt"></i>
+          <span>Vulnerabilities</span>
+        </a>
+      </li>
+      
+      <div class="nav-section-title">Intelligence</div>
+      <li class="nav-item">
+        <a href="#" class="nav-link" onclick="openSection(event, 'ThreatIntel')">
+          <i class="fas fa-database"></i>
+          <span>Threat Intel</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-file-alt"></i>
+          <span>Reports</span>
+        </a>
+      </li>
+      
+      <div class="nav-section-title">System</div>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" id="export-dropdown-trigger">
+          <i class="fas fa-download"></i>
+          <span>Export</span>
+        </a>
+        <div class="dropdown-menu" id="export-dropdown">
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-file-csv"></i> Export CSV
+          </a>
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-file-code"></i> Export JSON
+          </a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Bar -->
+    <div class="header-bar">
+      <h1 class="page-title">Vulnerability Dashboard</h1>
+      <div class="header-actions">
+        <div class="time-selector">
+          <button class="active">24h</button>
+          <button>7d</button>
+          <button>30d</button>
+          <button>All Time</button>
+        </div>
+        <button class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          <span>New Scan</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Statistics Overview -->
+    <section class="stats-grid">
+      <div class="stat-card critical">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="stat-value">4</div>
+        <div class="stat-label">Critical</div>
+      </div>
+      <div class="stat-card high">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="stat-value">12</div>
+        <div class="stat-label">High</div>
+      </div>
+      <div class="stat-card medium">
+        <i class="fas fa-exclamation"></i>
+        <div class="stat-value">23</div>
+        <div class="stat-label">Medium</div>
+      </div>
+      <div class="stat-card low">
+        <i class="fas fa-info-circle"></i>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Low</div>
+      </div>
+    </section>
+    
+    <!-- Chart Visualization -->
+    <div class="content-grid large-items">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Vulnerability Trend</h3>
+          <div class="card-actions">
+            <button class="btn btn-outline">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Vulnerability Distribution</h3>
+          <div class="card-actions">
+            <button class="btn btn-outline">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+         даг
+          <div class="chart-container">
+            <canvas id="distributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <div class="tab active" onclick="openSection(event, 'All')">All Vulnerabilities</div>
+      <div class="tab" onclick="openSection(event, 'Critical')">Critical</div>
+      <div class="tab" onclick="openSection(event, 'High')">High</div>
+      <div class="tab" onclick="openSection(event, 'Medium')">Medium</div>
+      <div class="tab" onclick="openSection(event, 'Low')">Low</div>
+      <div class="tab" onclick="openSection(event, 'ThreatIntel')">Threat Intelligence</div>
+    </nav>
+    
+    <!-- All Vulnerabilities Tab -->
+    <div id="All" class="tab-content active">
+      <div class="search-bar">
+        <input type="text" class="search-input" placeholder="Search vulnerabilities by CVE, host, or description..." id="vuln-search">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+      
+      <div class="table-container">
+        <table id="all-vulns-table">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Severity</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CVE-2023-35078</td>
+              <td><span class="card-badge critical">Critical</span></td>
+              <td>192.168.1.105</td>
+              <td>9.8</td>
+              <td>Remote code execution in Apache Struts...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-all-0')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-all-0" class="details-row" style="display: none;">
+              <td colspan="6">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Remote code execution vulnerability in Apache Struts framework allowing attackers to execute arbitrary code.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Update to the latest version of Apache Struts and apply security patches.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>CVE-2023-29552</td>
+              <td><span class="card-badge high">High</span></td>
+              <td>192.168.1.110</td>
+              <td>8.5</td>
+              <td>SQL injection in login form...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-all-1')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-all-1" class="details-row" style="display: none;">
+              <td colspan="6">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>SQL injection vulnerability in login form allowing attackers to bypass authentication and access sensitive data.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Implement parameterized queries and input validation.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>CVE-2023-25577</td>
+              <td><span class="card-badge medium">Medium</span></td>
+              <td>192.168.1.122</td>
+              <td>6.7</td>
+              <td>Cross-site scripting in search function...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-all-2')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-all-2" class="details-row" style="display: none;">
+              <td colspan="6">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Cross-site scripting (XSS) vulnerability in search function allowing attackers to inject malicious scripts.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Implement proper input sanitization and output encoding.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>CVE-2023-32081</td>
+              <td><span class="card-badge low">Low</span></td>
+              <td>192.168.1.135</td>
+              <td>3.2</td>
+              <td>Minor configuration issue...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-all-3')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-all-3" class="details-row" style="display: none;">
+              <td colspan="6">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Minor configuration issue in server settings.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Review and update server configuration settings.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Critical Vulnerabilities Tab -->
+    <div id="Critical" class="tab-content">
+      <h3 class="section-title">Critical Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CVE-2023-35078</td>
+              <td>192.168.1.105</td>
+              <td>9.8</td>
+              <td>Remote code execution in Apache Struts...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-critical-0')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-critical-0" class="details-row" style="display: none;">
+              <td colspan="5">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Remote code execution vulnerability in Apache Struts framework allowing attackers to execute arbitrary code.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Update to the latest version of Apache Struts and apply security patches.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- High Vulnerabilities Tab -->
+    <div id="High" class="tab-content">
+      <h3 class="section-title">High Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CVE-2023-29552</td>
+              <td>192.168.1.110</td>
+              <td>8.5</td>
+              <td>SQL injection in login form...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-high-0')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-high-0" class="details-row" style="display: none;">
+              <td colspan="5">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>SQL injection vulnerability in login form allowing attackers to bypass authentication and access sensitive data.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Implement parameterized queries and input validation.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Medium Vulnerabilities Tab -->
+    <div id="Medium" class="tab-content">
+      <h3 class="section-title">Medium Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CVE-2023-25577</td>
+              <td>192.168.1.122</td>
+              <td>6.7</td>
+              <td>Cross-site scripting in search function...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-medium-0')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-medium-0" class="details-row" style="display: none;">
+              <td colspan="5">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Cross-site scripting (XSS) vulnerability in search function allowing attackers to inject malicious scripts.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Implement proper input sanitization and output encoding.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Low Vulnerabilities Tab -->
+    <div id="Low" class="tab-content">
+      <h3 class="section-title">Low Severity Vulnerabilities</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>CVSS</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CVE-2023-32081</td>
+              <td>192.168.1.135</td>
+              <td>3.2</td>
+              <td>Minor configuration issue...</td>
+              <td class="table-actions">
+                <button class="table-action-btn tooltip" onclick="toggleDetails('details-low-0')">
+                  <i class="fas fa-eye"></i>
+                  <span class="tooltip-text">View Details</span>
+                </button>
+                <button class="table-action-btn tooltip">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="tooltip-text">View Report</span>
+                </button>
+              </td>
+            </tr>
+            <tr id="details-low-0" class="details-row" style="display: none;">
+              <td colspan="5">
+                <div class="details-content">
+                  <div class="details-section">
+                    <h4>Description</h4>
+                    <p>Minor configuration issue in server settings.</p>
+                  </div>
+                  <div class="details-section">
+                    <h4>Remediation</h4>
+                    <p>Review and update server configuration settings.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Threat Intelligence Tab -->
+    <div id="ThreatIntel" class="tab-content">
+      <h3 class="section-title">Threat Intelligence</h3>
+      <div class="content-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">CVE-2023-35078</h3>
+            <span class="card-badge critical" id="badge-CVE-2023-35078">Critical</span>
+          </div>
+          <div class="card-body">
+            <div class="threat-intel-content" id="ti-CVE-2023-35078">
+              <div class="threat-intel-item">
+                <div class="threat-intel-source">Source: NIST</div>
+                <p>Critical remote code execution vulnerability reported in Apache Struts.</p>
+                <div class="threat-intel-date">May 10, 2025</div>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="margin-top: 12px;" onclick="toggleTIDetails('CVE-2023-35078')">
+              View Full Details
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">CVE-2023-29552</h3>
+            <span class="card-badge high" id="badge-CVE-2023-29552">High</span>
+          </div>
+          <div class="card-body">
+            <div class="threat-intel-content" id="ti-CVE-2023-29552">
+              <div class="threat-intel-item">
+                <div class="threat-intel-source">Source: CVE Details</div>
+                <p>SQL injection vulnerability detected in multiple web applications.</p>
+                <div class="threat-intel-date">May 8, 2025</div>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="margin-top: 12px;" onclick="toggleTIDetails('CVE-2023-29552')">
+              View Full Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Latest Scan Section -->
+    <h2 class="section-title">Latest Scan Results</h2>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Network Scan - 192.168.1.0/24</h3>
+        <span>Completed: May 12, 2025 14:30</span>
+      </div>
+      <div class="card-body">
+        <div class="scan-summary">
+          <div class="summary-item">
+            <span class="summary-label">Total hosts:</span>
+            <span class="summary-value">42</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Vulnerabilities found:</span>
+            <span class="summary-value">57</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Scan duration:</span>
+            <span class="summary-value">14m 32s</span>
+          </div>
+        </div>
+        
+        <div class="scan-actions" style="margin-top: 16px; display: flex; gap: 8px;">
+          <button class="btn btn-primary">View Full Report</button>
+          <button class="btn btn-outline">Download Results</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal for Threat Intel Details -->
+    <div class="modal-backdrop" id="threatIntelModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Threat Intelligence: <span id="modalCveId"></span></h3>
+          <button class="modal-close" id="closeModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-ti-content"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="downloadThreatReport">
+            <i class="fas fa-download"></i> Download Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Sample data for charts
+    const vulnCounts = {
+      Critical: 4,
+      High: 12,
+      Medium: 23,
+      Low: 18
+    };
+    
+    // Tab navigation
+    function openSection(evt, sectionName) {
+      const tabContents = document.getElementsByClassName("tab-content");
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
+      }
+      
+      const tabs = document.getElementsByClassName("tab");
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      
+      document.getElementById(sectionName).classList.add("active");
+      
+      if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add("active");
+      } else if (evt && typeof evt === 'string') {
+        const tabElems = document.querySelectorAll('.tab');
+        for (let i = 0; i < tabElems.length; i++) {
+          if (tabElems[i].textContent.includes(sectionName)) {
+            tabElems[i].classList.add("active");
+            break;
+          }
+        }
+      }
+      
+      window.location.hash = sectionName;
+    }
+    
+    // Toggle vulnerability details
+    function toggleDetails(id) {
+      const detailsRow = document.getElementById(id);
+      if (detailsRow) {
+        detailsRow.style.display = detailsRow.style.display === 'table-row' ? 'none' : 'table-row';
+      }
+    }
+    
+    // Toggle Threat Intel Details Modal
+    function toggleTIDetails(cveId) {
+      const modal = document.getElementById('threatIntelModal');
+      document.getElementById('modalCveId').textContent = cveId;
+      
+      const tiContent = document.getElementById('ti-' + cveId);
+      if (tiContent) {
+        document.getElementById('modal-ti-content').innerHTML = tiContent.innerHTML;
+      }
+      
+      modal.classList.add('show');
+    }
+    
+    // Close modal
+    document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('threatIntelModal').classList.remove('show');
+    });
+    
+    // Search functionality
+    document.getElementById('vuln-search').addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#all-vulns-table tbody tr:not(.details-row)');
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const detailsId = row.querySelector('.table-action-btn').getAttribute('onclick');
+        const detailsRow = detailsId ? document.querySelector('#' + detailsId.match(/'([^']+)'/)[1]) : null;
+        
+        if (text.includes(searchTerm)) {
+          row.style.display = '';
+          if (detailsRow) detailsRow.style.display = detailsRow.style.display === 'table-row' ? 'table-row' : 'none';
+        } else {
+          row.style.display = 'none';
+          if (detailsRow) detailsRow.style.display = 'none';
+        }
+      });
+    });
+    
+    // Export dropdown functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const exportTrigger = document.getElementById('export-dropdown-trigger');
+      const exportDropdown = document.getElementById('export-dropdown');
+      
+      if (exportTrigger && exportDropdown) {
+        exportTrigger.addEventListener('click', function(e) {
+          e.preventDefault();
+          exportDropdown.classList.toggle('$show');
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!exportTrigger.contains(e.target) && !exportDropdown.contains(e.target)) {
+            exportDropdown.classList.remove('show');
+          }
+        });
+      }
+
+      // Initialize charts
+      initCharts();
+
+      // Initialize tabs based on URL hash
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const tabElement = document.querySelector(`.tab[onclick*="${hash}"]`);
+        if (tabElement) {
+          openSection(tabElement, hash);
+        }
+      }
+    });
+
+    // Initialize charts
+    function initCharts() {
+      // Trend chart
+      const trendCtx = document.getElementById('trendChart').getContext('2d');
+      const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+          datasets: [
+            {
+              label: 'Critical',
+              data: [3, 2, 5, 4, 6, 3, vulnCounts.Critical],
+              borderColor: '#ff4d4f',
+              backgroundColor: 'rgba(255, 77, 79, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'High',
+              data: [8, 7, 10, 9, 11, 10, vulnCounts.High],
+              borderColor: '#ff8c66',
+              backgroundColor: 'rgba(255, 140, 102, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Medium',
+              data: [15, 18, 22, 20, 16, 19, vulnCounts.Medium],
+              borderColor: '#ffaa00',
+              backgroundColor: 'rgba(255, 170, 0, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Low',
+              data: [12, 14, 10, 16, 15, 17, vulnCounts.Low],
+              borderColor: '#00cc99',
+              backgroundColor: 'rgba(0, 204, 153, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: 'var(--text-secondary)'
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                color: 'var(--text-muted)'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                color: 'var(--text-muted)'
+              }
+            }
+          }
+        }
+      });
+
+      // Distribution chart
+      const distCtx = document.getElementById('distributionChart').getContext('2d');
+      const distributionChart = new Chart(distCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Critical', 'High', 'Medium', 'Low'],
+          datasets: [{
+            data: [
+              vulnCounts.Critical,
+              vulnCounts.High,
+              vulnCounts.Medium,
+              vulnCounts.Low
+            ],
+            backgroundColor: [
+              '#ff4d4f',
+              '#ff8c66',
+              '#ffaa00',
+              '#00cc99'
+            ],
+            borderColor: 'rgba(0, 0, 0, 0)',
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: 'var(--text-secondary)'
+              }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
