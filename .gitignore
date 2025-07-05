@@ -78,16 +78,15 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# Large data files and caches
-*.pkl
-*.pickle
-*.csv
-*.json
-!requirements.txt
-!config.json
-!README.md
+# Large data files and caches (handled by Git LFS)
+# *.pkl - Now tracked by Git LFS
+# *.csv - Now tracked by Git LFS  
+# *.xml - Now tracked by Git LFS
+# exploitdb/** - Now tracked by Git LFS
+# models/** - Now tracked by Git LFS
+# static/data/** - Now tracked by Git LFS
 
-# Cache directories
+# Cache directories (not needed in repo)
 cve_cache/
 mitre_cache/
 remediation_cache/
@@ -99,34 +98,29 @@ shodan_cache/
 *.log
 logs/
 
-# Upload files
+# Upload files (user uploads, not needed in repo)
 uploads/
-*.xml
 
-# Generated reports
+# Generated reports (created during processing)
 integrated_results/
 scans/
 
-# Dashboard data
+# Dashboard data (runtime data, not needed in repo)
 dashboard_data.json
 jobs_persistence.json
 scan_history.json
 
-# Test files
+# Test files (generated during testing)
 test_vulnerabilities.json
-vulnerability_classifier.pkl
 
-# Exploit database
-exploitdb/
-
-# Models directory
-models/
-
-# Static data (generated)
-static/data/
-
-# Remediation feedback
+# Remediation feedback (user data, not needed in repo)
 remediation_feedback/
+
+# JSON files (except essential config files)
+*.json
+!requirements.txt
+!config.json
+!README.md
 
 # IDE files
 .vscode/
