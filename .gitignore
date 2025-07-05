@@ -86,38 +86,38 @@ dmypy.json
 # models/** - Now tracked by Git LFS
 # static/data/** - Now tracked by Git LFS
 
-# Cache directories (not needed in repo)
-cve_cache/
-mitre_cache/
-remediation_cache/
-exploit_cache/
-vulners_cache/
-shodan_cache/
+# Cache directories (now tracked by Git LFS)
+# cve_cache/ - Now tracked by Git LFS
+# mitre_cache/ - Now tracked by Git LFS
+# remediation_cache/ - Now tracked by Git LFS
+# exploit_cache/ - Now tracked by Git LFS
+# vulners_cache/ - Now tracked by Git LFS
+# shodan_cache/ - Now tracked by Git LFS
 
-# Log files
-*.log
+# Log files (now tracked by Git LFS)
+# *.log - Now tracked by Git LFS
 logs/
 
-# Upload files (user uploads, not needed in repo)
-uploads/
+# Upload files (now tracked by Git LFS)
+# uploads/ - Now tracked by Git LFS
 
-# Generated reports (created during processing)
-integrated_results/
-scans/
+# Generated reports (now tracked by Git LFS)
+# integrated_results/ - Now tracked by Git LFS
+# scans/ - Now tracked by Git LFS
 
-# Dashboard data (runtime data, not needed in repo)
-dashboard_data.json
-jobs_persistence.json
-scan_history.json
+# Dashboard data (now tracked by Git LFS)
+# dashboard_data.json - Now tracked by Git LFS
+# jobs_persistence.json - Now tracked by Git LFS
+# scan_history.json - Now tracked by Git LFS
 
-# Test files (generated during testing)
-test_vulnerabilities.json
+# Test files (now tracked by Git LFS)
+# test_vulnerabilities.json - Now tracked by Git LFS
 
-# Remediation feedback (user data, not needed in repo)
-remediation_feedback/
+# Remediation feedback (now tracked by Git LFS)
+# remediation_feedback/ - Now tracked by Git LFS
 
-# JSON files (except essential config files)
-*.json
+# JSON files (now tracked by Git LFS, except essential config files)
+# *.json - Now tracked by Git LFS
 !requirements.txt
 !config.json
 !README.md

@@ -1,1 +1,3 @@
-{"vm_ip": "192.168.1.11", "scan_mode": "quick", "api_key": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", "webhook_url": "", "auto_scan": false, "email_notify": false, "debug_mode": false}
+version https://git-lfs.github.com/spec/v1
+oid sha256:5bcb394fb22b0b84c25df86b0c81baa9657582bb8a4914c712a07a18cdc9f3c3
+size 241
