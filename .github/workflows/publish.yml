@@ -35,6 +35,8 @@ jobs:
     - name: Publish to GitHub Packages
       working-directory: ./openvas-xml-parser
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TWINE_USERNAME: ${{ github.actor }}
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        TWINE_REPOSITORY_URL: https://upload.pkg.github.com/Haseeb-1698/CyberPulse/
       run: |
-        python -m twine upload --repository-url https://upload.pkg.github.com/Haseeb-1698/CyberPulse/ dist/* 
+        python -m twine upload dist/* 
