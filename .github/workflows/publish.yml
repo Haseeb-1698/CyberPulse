@@ -37,4 +37,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        ls -l dist/
         python -m twine upload --repository-url https://upload.pkg.github.com/Haseeb-1698/CyberPulse/ dist/* 
